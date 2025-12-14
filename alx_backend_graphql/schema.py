@@ -1,15 +1,16 @@
 import graphene
-
-
-class CRMQuery(graphene.ObjectType):
-    """
-    Base query class for CRM-related queries.
-    """
-    pass
+from crm.schema import Query as CRMQuery, Mutation as CRMMutation
 
 
 class Query(CRMQuery, graphene.ObjectType):
-    hello = graphene.String(default_value="Hello, GraphQL!")
+    pass
 
 
-schema = graphene.Schema(query=Query)
+class Mutation(CRMMutation, graphene.ObjectType):
+    pass
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
+
+
+
