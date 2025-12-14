@@ -1,7 +1,14 @@
 import graphene
 
 
-class Query(graphene.ObjectType):
+class CRMQuery(graphene.ObjectType):
+    """
+    Base query class for CRM-related queries.
+    """
+    pass
+
+
+class Query(CRMQuery, graphene.ObjectType):
     hello = graphene.String(default_value="Hello, GraphQL!")
 
 
