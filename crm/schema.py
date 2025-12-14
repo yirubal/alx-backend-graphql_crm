@@ -1,5 +1,16 @@
 import re
 import graphene
+
+import graphene
+from graphene_django.filter import DjangoFilterConnectionField
+
+from .models import Customer, Product, Order
+from .filters import CustomerFilter, ProductFilter, OrderFilter
+from graphene_django import DjangoObjectType
+from graphene import relay
+
+
+
 from graphene_django import DjangoObjectType
 from django.db import transaction
 from django.utils import timezone
@@ -184,3 +195,63 @@ class Mutation(graphene.ObjectType):
     bulk_create_customers = BulkCreateCustomers.Field()
     create_product = CreateProduct.Field()
     create_order = CreateOrder.Field()
+
+
+class CustomerType(DjangoObjectType):
+    class Meta:
+        model = Customer
+        interfaces = (relay.Node,)
+        filterset_class = CustomerFilter
+        fields = "__all__"
+
+
+class ProductType(DjangoObjectType):
+    class Meta:
+        model = Product
+        interfaces = (relay.Node,)
+        filterset_class = ProductFilter
+        fields = "__all__"
+
+
+class OrderType(DjangoObjectType):
+    class Meta:
+        model = Order
+        interfaces = (relay.Node,)
+        filterset_class = OrderFilter
+        fields = "__all__"
+
+
+class CRMQuery(graphene.ObjectType):
+    all_customers = DjangoFilterConnectionField(
+        CustomerType,
+        order_by=graphene.String()
+    )
+    all_products = DjangoFilterConnectionField(
+        ProductType,
+        order_by=graphene.String()
+    )
+    all_orders = DjangoFilterConnectionField(
+        OrderType,
+        order_by=graphene.String()
+    )
+
+    def resolve_all_customers(self, info, **kwargs):
+        qs = Customer.objects.all()
+        order_by = kwargs.get("order_by")
+        if order_by:
+            qs = qs.order_by(order_by)
+        return qs
+
+    def resolve_all_products(self, info, **kwargs):
+        qs = Product.objects.all()
+        order_by = kwargs.get("order_by")
+        if order_by:
+            qs = qs.order_by(order_by)
+        return qs
+
+    def resolve_all_orders(self, info, **kwargs):
+        qs = Order.objects.all().distinct()
+        order_by = kwargs.get("order_by")
+        if order_by:
+            qs = qs.order_by(order_by)
+        return qs
